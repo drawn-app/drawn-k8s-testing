@@ -9,26 +9,31 @@ export function testLogin(params) {
     });
 }
 
-// export let options = {
-//     insecureSkipTLSVerify: true,
-//     noConnectionReuse: false,
-//     vus: 10, //num of concurrent users
-//     duration: '30s', //test duration
-// };
+export let options = {
+    insecureSkipTLSVerify: true,
+    noConnectionReuse: false,
+    stages: [
+        {duration: '10s', target: 100},
+        {duration: '30s', target: 500},
+        {duration: '10s', target: 0}, // for load test
+        {duration: '10s', target: 100},
+        {duration: '20s', target: 1000},
+        {duration: '10s', target: 0}, // for spike test
+        {duration: '20s', target: 400 },
+        {duration: '30s', target: 400 },
+        {duration: '10s', target: 0 }, //for stress test
+        {duration: '10s', target: 100 },
+        {duration: '5m', target: 100 },
+        {duration: '10s', target: 0 }, //for soak test
+    ],
+};
 
 export default () => {    
     http.get('http://localhost');
-    sleep(1); //every user away request api every 1 second
-    http.get('http://localhost/login');
     let data = { email: 'drawn@gmail.com', password: '0123456789' };
     let res = http.post('http://localhost/api/auth/login', data);
-    // console.log(res);
-    check(res, {
-        'is login status 200': (r) => r.status === 200,
-    });
-    sleep(1);
-
-    // Extract auth cookie from Set-Cookie header
+    let responseBody = JSON.parse(res.body);
+    let userId = responseBody.id;
     let authCookie = null;
     const setCookieHeader = res.headers['Set-Cookie'];
     if (setCookieHeader) {
@@ -41,28 +46,14 @@ export default () => {
         }
         }
     }
-
-    // Check if auth cookie is found
-    if (!authCookie) {
-        console.error("Failed to extract auth cookie from login response");
-        return; // Exit if no cookie found
-    }
-
-    // Construct the GET request with the auth cookie
-    let options = {
+    let headers = {
         headers: {
             Cookie: `auth=${authCookie}`, // Set the auth cookie in the header
         },
     };
-
-    // GET request to retrieve workspaces
-    let workspacesRes = http.get('http://localhost/workspaces', options);
-
-    // Check response status for workspaces request
-    check(workspacesRes, {
-        'is workspaces status 200': (r) => r.status === 200,
-    });
-
-    // Process or log the workspaces response (workspacesRes)
-    console.log(workspacesRes); // Example: Log the JSON response body
+    sleep(1);
+    
+    http.get(`http://localhost/api/users/${userId}`);
+    http.get('http://localhost/api/workspaces', headers);
+    http.get('http://localhost/api/chat/1/messages', headers);  
     };
