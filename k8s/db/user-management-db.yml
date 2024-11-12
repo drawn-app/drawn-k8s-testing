@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-user-management-db
+  labels:
+    app: drawn-user-management-db
+spec:
+  selector:
+    matchLabels:
+      app: drawn-user-management-db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: drawn-user-management-db
+    spec:
+      containers:
+      - name: drawn-user-management-db
+        image: postgres:16.2
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: user-management
+        - name: POSTGRES_USER
+          value: ???
+        - name: POSTGRES_PASSWORD
+          value: ???
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: drawn-user-management-db
+spec:
+  selector:
+    app: drawn-user-management-db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

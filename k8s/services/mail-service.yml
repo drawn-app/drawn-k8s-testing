@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-mail
+  labels:
+    app: drawn-mail-service
+spec:
+  selector:
+    matchLabels:
+      app: drawn-mail-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: drawn-mail-service
+    spec:
+      containers:
+      - name: drawn-mail-service
+        image: sorawit12535/drawn-mail-service:1.0.0
+        ports:
+        - containerPort: 3000
+        env:
+        - name: EMAIL_USER
+          value: ???
+        - name: EMAIL_PASS
+          value: ???
+        - name: RABBITMQ_URL
+          value: "amqp://rabbitmq"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: drawn-mail-service
+spec:
+  type: ClusterIP
+  selector:
+    app: drawn-mail-service
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000

@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-workspace-management
+  labels:
+    app: drawn-workspace-management-service
+spec:
+  selector:
+    matchLabels:
+      app: drawn-workspace-management-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: drawn-workspace-management-service
+    spec:
+      initContainers:
+      - name: drawn-workspace-management-migrate
+        image: sorawit12535/drawn-workspace-management-service:1.1.0
+        env:
+        - name: DATABASE_URL
+          value: ???
+        command: ["sh", "-c", "npx prisma db push"]
+      containers:
+      - name: drawn-workspace-management
+        image: sorawit12535/drawn-workspace-management-service:1.1.0
+        ports:
+        - containerPort: 3000
+        env:
+        - name: DATABASE_URL
+          value: ???
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: drawn-workspace-management-service
+spec:
+  type: ClusterIP
+  selector:
+    app: drawn-workspace-management-service
+  ports:
+    - protocol: TCP
+      port: 3001
+      targetPort: 3001
