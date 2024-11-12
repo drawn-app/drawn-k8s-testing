@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-workspace-management-db
+  labels:
+    app: drawn-workspace-management-db
+spec:
+  selector:
+    matchLabels:
+      app: drawn-workspace-management-db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: drawn-workspace-management-db
+    spec:
+      containers:
+      - name: drawn-workspace-management-db
+        image: postgres:16.2
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: workspace-management
+        - name: POSTGRES_USER
+          value: ???
+        - name: POSTGRES_PASSWORD
+          value: ???
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: drawn-workspace-management-db
+spec:
+  selector:
+    app: drawn-workspace-management-db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
